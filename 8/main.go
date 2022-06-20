@@ -2,15 +2,23 @@ package main
 
 import "fmt"
 
+//создаем тестовое число int64
 var in int64 = 1000
 
 func main() {
-	fmt.Printf("%b\n", in)
-	offset(in, 1, 1)
-
+	//выводим тестовое число преобразуя его в формат двоичных чисел (для наглядности)
+	fmt.Printf("Input Dec:%d, bin:%[1]b\n", in)
+	//выводим число с заменой указанного бита преобразуя его в формат двоичных чисел (для наглядности)
+	fmt.Printf("Result Dec:%d, bin:%[1]b\n", offset(in, 1))
 }
 
-func offset(num int64, bit, bitPos int) {
-	num = num << 1
-	fmt.Printf("%b", num)
+//фунцкия замены указанного бита в числе
+func offset(num int64, bitPos int) int64 {
+	//создаем битовую маску(шаблон) для побитового исключения (ИЛИ)
+	//т.е. 1 = 1<<0, 10 = 1<<2, 100 = 1 << 3, и т.д.
+	var template int64 = 1 << (bitPos - 1)
+	//производим побитовое исключение входного числа и сгенерированной маски
+	result := num ^ template
+	//возвращаем результат замены
+	return result
 }
