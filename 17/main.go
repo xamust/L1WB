@@ -1,20 +1,42 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
 
-//входные данные
-var testMassInt = []int{100, 23, 67, 44, 78, 45, 34, 23, 31, 1, 0, 8, 4, 34, 35, 53, 46, 47, 90}
+//структура для вывода корректной информации
+type Result struct {
+	result int
+	flag   bool
+}
 
 func main() {
+	//генерим массив
+	testMassInt := createMass(21)
+
 	//для бинарного поиска нужен отсортированный массив
-	sort(testMassInt)
+	//sort(testMassInt)
+	quickSort(testMassInt)
 	//для наглядности выводим отсортированный массив
 	fmt.Println(testMassInt)
 	//выполняем поиск и выводим результат
 	fmt.Println(binarySearch(testMassInt, 23))
+
 }
 
-//сортируем массив сортировкой вставкой
+//функция генерация массива со случайными элементами
+func createMass(countElement int) []int {
+	rand.Seed(time.Now().UnixNano())
+	resultMass := make([]int, countElement)
+	for i := 0; i < countElement; i++ {
+		resultMass[i] = rand.Intn(100)
+	}
+	return resultMass
+}
+
+//сортировка вставкой
 func sort(sortedMass []int) {
 	for i := 0; i < len(sortedMass)-1; i++ {
 		for j := 0; j < len(sortedMass)-i-1; j++ {
@@ -25,28 +47,38 @@ func sort(sortedMass []int) {
 	}
 }
 
-func binarySearch(sortedMass []int, searchNum int) (result int) {
-	result = -1
+//быстрая сортировка
+func quickSort(sortedMass []int) {
+	for i := 0; i < len(sortedMass)-1; i++ {
+		if sortedMass[i] > sortedMass[i+1] {
+			sortedMass[i], sortedMass[i+1] = sortedMass[i+1], sortedMass[i]
+			quickSort(sortedMass)
+		}
+	}
+}
+
+func binarySearch(sortedMass []int, searchNum int) (result Result) {
+	//в переменных min и max хранятся границы списка, в рамках которых проходит поиск
 	min := 0
 	max := len(sortedMass) - 1
+	//циклом бегаем до тех пор, пока список не сократится до 1го элемента
 	for max >= min {
+		//делим список на 2 части
 		count := (max + min) / 2
+		//проверяем значение в середине, если равно искомому, то возвращаем структуру со значением и флагом true
 		if sortedMass[count] == searchNum {
-			i := 0
-			for {
-				if count > 0 && sortedMass[count-i] != sortedMass[count] {
-					result = count
-					break
-				} else {
-					i++
-				}
+			return Result{
+				result: count,
+				flag:   true,
 			}
-			break
+			//если значение в середине списка больше искомого, то смещаем наш поиск на первую половину списка
 		} else if sortedMass[count] > searchNum {
 			max = count - 1
+			//если значение в середине меньше искомого, то смещаем наш поиск на вторую половину списка
 		} else {
 			min = count + 1
 		}
 	}
-	return
+	//если ничего не нашли, то возвращаем структуру c флагом false
+	return Result{flag: false}
 }
