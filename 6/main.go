@@ -1,46 +1,67 @@
 package main
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+	"log"
+	"sync"
+	"time"
+)
 
-func CloseChannel() chan int {
-	ch := make(chan int)
+var wg sync.WaitGroup
+
+//1.завершение горутины, путем закрытия канала
+func CloseChannel() chan string {
+	log.Println("Close chan, start")
+	ch := make(chan string)
 	go func() {
-		n := 1
+
 		for {
 			select {
-			case ch <- n:
-				n++
+			case ch <- "1 stil works":
+
 			case <-ch:
+				log.Println("Goroutine1 stop, ctx")
 				return
 			}
 		}
 	}()
+	wg.Done()
 	return ch
 }
 
-func BoolToStop(bool) {
-	ch := make(chan bool)
-	go func(chan bool) {
+//2.завершение горутины, при помощи контекста
+func CloseCtx() {
+	log.Println("Context, start")
+	ctx, cancel := context.WithCancel(context.Background())
+	go func(ctx context.Context) {
 		for {
 			select {
-			case <-ch:
+			case <-ctx.Done():
+				log.Println("Goroutine2 stop, ctx")
 				return
 			default:
-				fmt.Println("Goroutine 2 is stil work...")
+				//some work...
+				time.Sleep(time.Second)
+				log.Println("2 stil works")
 			}
 		}
-		fmt.Println("Goroutine 2 is finished")
-	}(ch)
+	}(ctx)
+	time.Sleep(time.Second)
+	cancel()
+	wg.Done()
 }
 
 func main() {
-	//?????
-	//boolCh := make(chan bool)
-	//BoolToStop(true)
-	//boolCh <- true
-
+	wg.Add(1)
 	myNumber := CloseChannel()
 	fmt.Println(<-myNumber)
 	fmt.Println(<-myNumber)
 	close(myNumber)
+
+	wg.Add(1)
+	CloseCtx()
+
+	wg.Wait()
+	log.Println("end")
 }

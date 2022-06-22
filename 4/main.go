@@ -1,7 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
+	"os"
+	"os/signal"
 	"sync"
 	"time"
 )
@@ -10,30 +14,40 @@ var wg sync.WaitGroup
 
 func main() {
 	var workersNum int
-	ch := make(chan int)
-	out := make(chan int)
+	in := make(chan int)
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
+
 	fmt.Println("Set workers num:")
 	fmt.Scan(&workersNum)
+	log.Println("Workers pull start...")
 	for i := 0; i <= workersNum; i++ {
 		wg.Add(1)
-		go worker(i, ch, out)
+		go worker(i, in, ctx)
 	}
-	for j := 1; j <= 5; j++ {
-		ch <- j
-	}
-	close(ch)
-	wg.Wait()
-	for a := 1; a <= 5; a++ {
-		<-out
+
+	for x := 0; ; x++ {
+		select {
+		case <-ctx.Done():
+			close(in)
+			wg.Wait()
+			return
+		default:
+		}
+		time.Sleep(time.Second)
+		in <- x
 	}
 }
 
-func worker(id int, jobs <-chan int, results chan<- int) {
-	for j := range jobs {
-		fmt.Println("worker", id, "started  job", j)
-		time.Sleep(time.Second)
-		fmt.Println("worker", id, "finished job", j)
-		results <- j * 2
+func worker(id int, in chan int, ctx context.Context) {
+	defer wg.Done()
+	for j := range in {
+		select {
+		case <-ctx.Done():
+			log.Println("Pull is closed")
+			return
+		default:
+			fmt.Printf("worker %d receive %d\n", id, j)
+		}
 	}
-	wg.Done()
 }
