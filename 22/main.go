@@ -6,7 +6,8 @@ import (
 )
 
 type BigProc struct {
-	bigProc big.Int
+	bigProc      big.Int
+	bigProcFloat big.Float
 }
 
 func main() {
@@ -16,11 +17,11 @@ func main() {
 	//var newBigInt2 = big.NewInt(1 << 220) (overflows)
 	bigInt2 := "1684996666696914987166688442938726917102321526408785780068975640576"
 
-	newBigInt1 := new(big.Int)
-	newBigInt1.SetString(bigInt1, 10)
+	newBigInt1 := new(big.Float)
+	newBigInt1.SetString(bigInt1)
 
-	newBigInt2 := new(big.Int)
-	newBigInt2.SetString(bigInt2, 10)
+	newBigInt2 := new(big.Float)
+	newBigInt2.SetString(bigInt2)
 
 	fmt.Println(newBigInt1, newBigInt2)
 
@@ -31,18 +32,18 @@ func main() {
 	fmt.Println(myBig.bigMul(newBigInt1, newBigInt2))
 }
 
-func (b *BigProc) bigSum(first, second *big.Int) *big.Int {
-	return b.bigProc.Add(first, second)
+func (b *BigProc) bigSum(first, second *big.Float) *big.Float {
+	return b.bigProcFloat.Add(first, second)
 }
 
-func (b *BigProc) bigSub(first, second *big.Int) *big.Int {
-	return b.bigProc.Sub(first, second)
+func (b *BigProc) bigSub(first, second *big.Float) *big.Float {
+	return b.bigProcFloat.Sub(first, second)
 }
 
-func (b *BigProc) bigDiv(first, second *big.Int) *big.Int {
-	return b.bigProc.Div(first, second)
+func (b *BigProc) bigDiv(first, second *big.Float) *big.Float {
+	return b.bigProcFloat.Quo(first, second)
 }
 
-func (b *BigProc) bigMul(first, second *big.Int) *big.Int {
-	return b.bigProc.Mul(first, second)
+func (b *BigProc) bigMul(first, second *big.Float) *big.Float {
+	return b.bigProcFloat.Mul(first, second)
 }
